@@ -9,6 +9,10 @@ public class LaserTest : MonoBehaviour {
 		Head,
 		Body,
 		Tail,
+
+		CenterHead,
+		CenterBody,
+		CenterTail,
 		Max
 	}
 
@@ -17,6 +21,7 @@ public class LaserTest : MonoBehaviour {
 
 	const int LaserLenMax = 16;
 	GameObject[] m_laser = new GameObject[LaserLenMax];
+	GameObject[] m_laserCenter = new GameObject[LaserLenMax];
 	int m_laserIndex = 0;
 	int m_laserIndexTop = 0;
 	int m_laserCount = 0;
@@ -38,8 +43,12 @@ public class LaserTest : MonoBehaviour {
 		m_sprites[(int)Parts.Body] = System.Array.Find<Sprite>(sprites, sprite => sprite.name == "body");
 		m_sprites[(int)Parts.Tail] = System.Array.Find<Sprite>(sprites, sprite => sprite.name == "tail");
 
+		m_sprites[(int)Parts.CenterHead] = System.Array.Find<Sprite>(sprites, sprite => sprite.name == "center_head");
+		m_sprites[(int)Parts.CenterBody] = System.Array.Find<Sprite>(sprites, sprite => sprite.name == "center_body");
+		m_sprites[(int)Parts.CenterTail] = System.Array.Find<Sprite>(sprites, sprite => sprite.name == "center_tail");
+
 		m_pos = new Vector3(10, 10, 0);
-		m_dir = new Vector3(-1, 1, 0).normalized;
+		m_dir = new Vector3(-1, 2, 0).normalized;
 		m_speed = 4;
 		m_isBeforeReflected = false;
 	}
@@ -47,19 +56,25 @@ public class LaserTest : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		GameObject obj;
+		GameObject obj, objCenter;
 		if( m_laser[m_laserIndex] == null )
 		{
 			obj = GameObject.Instantiate<GameObject>(m_laserParts[(int)Parts.Head]);
 			m_laser[m_laserIndex] = obj;
 			obj.transform.SetParent(gameObject.transform, false);
+
+			objCenter = GameObject.Instantiate<GameObject>(m_laserParts[(int)Parts.Head]);
+			m_laserCenter[m_laserIndex] = objCenter;
+			objCenter.transform.SetParent(gameObject.transform, false);
 		}
-		else
-		{
-			obj = m_laser[m_laserIndex];
-			var spr = obj.GetComponent<SpriteRenderer>();
-			spr.sprite = m_sprites[(int)Parts.Head];
-		}
+
+		obj = m_laser[m_laserIndex];
+		var spr = obj.GetComponent<SpriteRenderer>();
+		spr.sprite = m_sprites[(int)Parts.Head];
+
+		objCenter = m_laserCenter[m_laserIndex];
+		spr = objCenter.GetComponent<SpriteRenderer>();
+		spr.sprite = m_sprites[(int)Parts.CenterHead];
 
 		var angle = Vector3.Angle(new Vector3(1, 0, 0), m_dir);
 		var o = Vector3.Cross(new Vector3(1, 0, 0), m_dir);
@@ -68,6 +83,7 @@ public class LaserTest : MonoBehaviour {
 			angle = -angle;
 		}
 		obj.transform.rotation = Quaternion.AngleAxis(angle, new Vector3(0,0,1));
+		objCenter.transform.rotation = Quaternion.AngleAxis(angle, new Vector3(0, 0, 1));
 
 		bool isReflected = false;
 		var after = m_pos + m_dir * m_speed;
@@ -98,6 +114,13 @@ public class LaserTest : MonoBehaviour {
 			prevSpr.sprite = m_sprites[(int)Parts.Body];
 		}
 
+		var prevObjCenter = m_laserCenter[prevIndex];
+		if (prevObjCenter != null && !m_isBeforeReflected)
+		{
+			var prevSpr = prevObjCenter.GetComponent<SpriteRenderer>();
+			prevSpr.sprite = m_sprites[(int)Parts.CenterBody];
+		}
+
 		//	反射後の1つ手前の絵を変えないようにするため状態を残す
 		m_isBeforeReflected = isReflected;
 
@@ -110,16 +133,27 @@ public class LaserTest : MonoBehaviour {
 			lastSpr.sprite = m_sprites[(int)Parts.Tail];
 		}
 
+		var lastObjCenter = m_laserCenter[lastIndex];
+		if (lastObjCenter != null)
+		{
+			var lastSpr = lastObjCenter.GetComponent<SpriteRenderer>();
+			lastSpr.sprite = m_sprites[(int)Parts.CenterTail];
+		}
+
 		//	描画が破綻しないようにオーダーを先頭から順番に割り振る
-		for(int i=0; i<LaserLenMax; i++)
+		for (int i=0; i<LaserLenMax; i++)
 		{
 			var index = (m_laserIndex + i) % LaserLenMax;
 			if (!m_laser[index]) continue;
-			var spr = m_laser[index].GetComponent<SpriteRenderer>();
+			spr = m_laser[index].GetComponent<SpriteRenderer>();
 			spr.sortingOrder = i;
+
+			spr = m_laserCenter[index].GetComponent<SpriteRenderer>();
+			spr.sortingOrder = i+LaserLenMax;
 		}
 
 		obj.transform.position = m_pos;
+		objCenter.transform.position = m_pos;
 
 		m_laserCount++;
 		m_laserIndex = (m_laserIndex + 1) % LaserLenMax;
@@ -129,7 +163,7 @@ public class LaserTest : MonoBehaviour {
 			m_laserCount = LaserLenMax;
 			m_laserIndexTop = (m_laserIndexTop + 1) % LaserLenMax;
 		}
-
+			
 	}
 
 
