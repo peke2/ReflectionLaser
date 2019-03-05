@@ -47,9 +47,9 @@ public class Snake : MonoBehaviour {
 		grow();
 		rolling();
 		var neckTop = m_parts[NECK_PARTS_MAX - 1];
-		var offset = m_neckTopOffsetX;
+		var offset = m_neckTopOffsetX*0.5f;
 
-		if(offset > 0)
+		if(offset < 0)
 		{
 			offset = 0;
 		}
