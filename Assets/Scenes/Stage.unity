@@ -2016,6 +2016,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_direction: {x: -1, y: 4}
+  m_speed: 2
 --- !u!4 &1894306349
 Transform:
   m_ObjectHideFlags: 0
@@ -2057,6 +2058,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_direction: {x: 2, y: 1}
+  m_speed: 1
 --- !u!4 &1905331228
 Transform:
   m_ObjectHideFlags: 0

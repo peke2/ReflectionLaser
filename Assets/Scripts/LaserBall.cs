@@ -14,6 +14,7 @@ public class LaserBall : MonoBehaviour {
 	}
 
 	public Vector2 m_direction = new Vector2(1,1);
+	public float m_speed = 2.0f;
 
 	GameObject[] m_laserParts = new GameObject[(int)Parts.Max];
 	Sprite[] m_sprites = new Sprite[(int)Parts.Max];
@@ -31,8 +32,9 @@ public class LaserBall : MonoBehaviour {
 
 	Vector3 m_dir;
 	Vector3 m_pos;
-	float m_speed;
 	bool m_isBeforeReflected;
+
+	const float MAX_DISTANCE = 3.0f;
 
 	// Use this for initialization
 	void Start () {
@@ -47,8 +49,22 @@ public class LaserBall : MonoBehaviour {
 
 		m_pos = gameObject.transform.position;
 		m_dir = m_direction.normalized;
-		m_speed = 3;
 		m_isBeforeReflected = false;
+
+		for (int i = 0; i < (int)Parts.Max; i++)
+		{
+			for(int j=0; j<LaserLenMax; j++)
+			{
+				var obj = GameObject.Instantiate<GameObject>(m_laserParts[0]);
+				m_laserObjs[i][j] = obj;
+				obj.transform.SetParent(gameObject.transform, false);
+				var spr = obj.GetComponent<SpriteRenderer>();
+				spr.sprite = sprites[(int)Parts.Ball_0 + i];
+				spr.sortingOrder = (int)Parts.Max - i;
+				obj.transform.position = m_pos;
+			}
+		}
+
 	}
 
 	// Update is called once per frame
@@ -170,14 +186,14 @@ public class LaserBall : MonoBehaviour {
 		m_pos = pos;
 		m_dir = dir;
 
-		m_laserCount++;
+		/*m_laserCount++;
 		m_laserIndex = (m_laserIndex + 1) % LaserLenMax;
 
 		if (m_laserCount >= LaserLenMax)
 		{
 			m_laserCount = LaserLenMax;
 			m_laserIndexTop = (m_laserIndexTop + 1) % LaserLenMax;
-		}
+		}*/
 
 #endif
 	}
@@ -206,7 +222,7 @@ public class LaserBall : MonoBehaviour {
 			spr = laserObjs[index].GetComponent<SpriteRenderer>();
 			spr.sortingOrder = order;
 		}*/
-
+		/*
 		for (int i = 0; i < (int)Parts.Max; i++)
 		{
 			GameObject obj;
@@ -224,7 +240,50 @@ public class LaserBall : MonoBehaviour {
 				obj = m_laserObjs[i][m_laserIndex];
 			}
 			obj.transform.position = pos;
+		}*/
+
+
+		var p0 = m_laserObjs[0][0].transform.position;
+		Vector3 p;
+		if( (pos - p0).magnitude > MAX_DISTANCE)
+		{
+			p = pos - (pos - p0).normalized * MAX_DISTANCE;
 		}
+		else
+		{
+			p = p0;
+		}
+
+		for (int i = 0; i < (int)Parts.Max; i++)
+		{
+			m_laserObjs[i][0].transform.position = pos;
+		}
+
+		for (int i = 0; i < (int)Parts.Max; i++)
+		{
+			m_laserObjs[i][1].transform.position = p;
+		}
+
+		for (int i = 0; i < (int)Parts.Max; i++)
+		{
+			for (int j = LaserLenMax-1; j > 1 ; j--)
+			{
+				//var p0 = m_laserObjs[i][j].transform.position;
+				var p1 = m_laserObjs[i][j-1].transform.position;
+				var p2 = m_laserObjs[i][j-2].transform.position;
+
+				if ( (p2 - p1).magnitude > MAX_DISTANCE)
+				{
+					p = p2 - (p2 - p1).normalized * MAX_DISTANCE;
+				}
+				else
+				{
+					p = p1;
+				}
+				m_laserObjs[i][j].transform.position = p;
+			}
+		}
+
 	}
 
 
