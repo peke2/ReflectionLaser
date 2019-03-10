@@ -37,6 +37,7 @@ public class LaserBall : MonoBehaviour {
 
 	const float MAX_DISTANCE = 3.0f;
 
+
 	// Use this for initialization
 	void Start () {
 		m_laserParts[0] = Resources.Load<GameObject>("LaserHead_L");
@@ -110,13 +111,16 @@ public class LaserBall : MonoBehaviour {
 
 		//	今の先頭との距離を出す
 		var diff = after - pos;
-		float num = diff.magnitude / MAX_DISTANCE;
-		var resCount = (int)Mathf.Ceil(diff.magnitude / MAX_DISTANCE);
+		//float num = diff.magnitude / MAX_DISTANCE;
+		//var resCount = (int)Mathf.Ceil(diff.magnitude / MAX_DISTANCE);
+		var resCount = (int)Mathf.Round(diff.magnitude / MAX_DISTANCE);
 
-		if( resCount == 2 )
+		/*if (num != 1)
 		{
-			Debug.Log("");
-		}
+			var len = diff.magnitude;
+			Debug.Log(len);
+		}*/
+
 
 		//	最大間隔が何個分か求める
 		//	リソースの最大数を超えない数に抑える
